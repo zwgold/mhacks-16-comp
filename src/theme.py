@@ -2,6 +2,8 @@ import torch
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
+from preprocess_wordlist import VALID_CWORD_SOURCES
+
 from tqdm import tqdm
 
 class Querier(): 
@@ -26,7 +28,7 @@ class Querier():
     def gen_seed_words(self,  query:str,  n,    
             lenrange=(10,14),
             device=None,
-            sources =set(['times_xwd_times', 'cru_cryptics','newyorker', 'thebrowser', 'leoedit', 'nytimes'])
+            sources =set(VALID_CWORD_SOURCES)
             ): 
         queries = self.query_df 
         emb = self.model.encode(query)
@@ -38,14 +40,32 @@ class Querier():
         if sources is not None: 
             queries = queries[queries.source.isin(sources)]
 
-        queries = queries.sort_values('score',ascending=False)
-        print(queries)
+        queries = queries.sort_values('score',ascending=False).drop_duplicates(subset=['answer'])
+        # print(queries)
         return queries.head(n)
+
+    def reweight_wordlist(self,query,wordlist_in_file, wordlist_out_file):
+        pass
+
+    def get_clue_for_word(self,word,clues_df,sources = VALID_CWORD_SOURCES):
+ 
+        options = clues_df[clues_df['answer'].apply(lambda x: x.lower()) == word.lower()]
+        # print(len(options),word) 
+
+        if sources is not None: 
+            options= options[options['source'].isin(sources)]
+
+        # print(options)
+        # print(len(options))
+        choice = options.sample(n=1)
+        # print(choice)
+        return choice['clue'].iloc[0]
 
 def encode(queries:pd.DataFrame,
            model_name="sentence-transformers/msmarco-MiniLM-L12-cos-v5",
-           lenrange=(8,14),
+           lenrange=(0,16),
            device=None,
+           suffix= "",
            sources =None ): 
     if device is None and  torch.backends.mps.is_available(): 
         device = 'mps'
@@ -61,23 +81,36 @@ def encode(queries:pd.DataFrame,
     queries = queries.reset_index(drop=True)
 
     # queries = queries.head(1000)
-    query_texts = queries.apply(lambda x:x['answer']  + ": " + '('.join(x['clue'].split('(')[:-1]),axis=1)
+    query_texts = queries.apply(lambda x:x['answer'] ,axis=1)
     model = SentenceTransformer(model_name_or_path=model_name,device=device)
 
     print('loaded model')
     embeddings = model.encode(sentences=query_texts.to_numpy())
     print('embedded')
-    np.save('../data/embeddings.numpy',embeddings)
-    queries.to_csv('../data/embedding_queries.csv')
-    queries.to_pickle('../data/embedding_queries.pkl')
+    np.save(f'../data/embeddings{suffix}.numpy',embeddings)
+    queries.to_csv(f'../data/embedding_queries{suffix}.csv')
+    queries.to_pickle(f'../data/embedding_queries{suffix}.pkl')
+
+
 
     
 if __name__ == "__main__": 
     df = pd.read_pickle('../data/clues.pd')
-    encode(df,lenrange=(10,14))
+    model_name = 'sentence-transformers/msmarco-MiniLM-L12-cos-v5'
+    suffix = ''
+    print(df)
 
-    querier = Querier()
-    print(querier.get_queries('fluffy white dog',n=5))
+
+    encode(df,model_name=model_name,lenrange=(0,15),suffix=suffix)
+
+    querier = Querier(
+        model_name=model_name,
+        query_df_path=f'../data/embedding_queries{suffix}.pkl',
+        embs_path=f'../data/embeddings{suffix}.numpy.npy'
+    )
+    print(querier.gen_seed_words('fluffy white dog',n=5,lenrange=(10,14)))
+    print(querier.get_clue_for_word('test',df))
+
 
 
 

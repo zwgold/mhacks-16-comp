@@ -8,9 +8,8 @@ import pandas as pd
 from collections import defaultdict
 from tqdm import tqdm 
 
-
-
-
+# valid_sources = ['newyorker','nytimes','cru_cryptics','bigdave','natpostcryptic']
+VALID_CWORD_SOURCES = ['nytimes','newyorker','thebrowser','bigdave44']
 
 def load_clues_df(clueslist_path:str ):
     df = pd.read_csv(clueslist_path)
@@ -30,6 +29,7 @@ def load_clues_df(clueslist_path:str ):
 
 def filter_wordlist(clueslist_path:str, wordlist_path:str,filtered_path, min_score=10,filter_df = True): 
     clues_df, word_clues = load_clues_df(clueslist_path=clueslist_path)
+    # clues_df = clues_df[clues_df.source.isin(VALID_CWORD_SOURCES)]
     filtered_words = set()
     n_min_score =0
     n_clue_filtered = 0 
@@ -52,10 +52,13 @@ def filter_wordlist(clueslist_path:str, wordlist_path:str,filtered_path, min_sco
         filtered_df =clues_df[clues_df['answer'].apply(lambda x: x.lower()).isin(filtered_words)]
         print(filtered_df)
         filtered_df.to_pickle('../data/clues.pd') 
-    return filtered_df
+        filtered_df.to_csv('../data/clues.csv') 
+
+        return filtered_df
+
 
 if __name__ == "__main__":
-    clues = filter_wordlist('../data/clues.csv','../data/spreadthewordlist.dict','../data/filtered_wordlist.dict')
+    clues = filter_wordlist('../data/clues.csv','../data/spreadthewordlist.dict','../data/filtered_wordlist_2.dict')
     print(clues)
                 
     

@@ -128,7 +128,7 @@ def get_words_across_down(matrixRep) -> tuple[list[str], list[str]]:
                 j += 1
             
             #across.append((temp, (idx, i)))
-            across.append(temp)
+            across.append((temp, (idx, i)))
             i = j + 1
 
     # Down
@@ -150,7 +150,6 @@ def get_words_across_down(matrixRep) -> tuple[list[str], list[str]]:
             down.append((temp, (i, idx)))
             i = j + 1
     down.sort(key = lambda x: x[1][0]*100 + x[1][1])
-    down = [word for (word, _) in down]
     return (across, down)
 
 def main():

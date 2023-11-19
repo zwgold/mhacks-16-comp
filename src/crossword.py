@@ -89,6 +89,8 @@ def gen_seed_words(topic,n=4,lenrange=(10,14),load_from_file='../data/clues.pd',
     choices = df.sample(n=n)
     return choices
 
+
+
 if __name__ == "__main__": 
     gen_seed_words("my dog mitsy")
 
