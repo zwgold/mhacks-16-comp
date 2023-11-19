@@ -1,0 +1,3 @@
+[submodule "svcrossword"]
+	path = svcrossword
+	url = https://github.com/russellsamora/svelte-crossword.git
