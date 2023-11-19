@@ -8,4 +8,6 @@ https://cs.stackexchange.com/questions/123618/algorithm-to-create-dense-style-cr
 https://cdn.aaai.org/AAAI/1990/AAAI90-032.pdf
 
 https://github.com/FedericoStazi/crossword-generator
+
+ingrid_core --help
 """

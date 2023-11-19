@@ -56,7 +56,7 @@ class Grid():
         self.grid = grid
         self.dim = dim
 
-    def get_grid_capacity(self) -> tuple[list[tuple[int]]]:
+    def get_grid_capacity(self) -> list[str]:
         # across / down--> list of tuples (start pos, len of word)
         across = []
         down = []
@@ -77,7 +77,7 @@ class Grid():
                     j += 1
                 
                 run = j - i
-                across.append((i, run))
+                across.append((i, run, ))
                 i = j + 1
 
             i = 0
@@ -106,8 +106,52 @@ class Grid():
         self.down_lengths = Counter(down_lengths)
         return (across, down)
 
-                
-                
+
+def get_words_across_down(matrixRep) -> tuple[list[str], list[str]]:
+    across = []
+    down = []
+
+    # Across
+    for idx, row in enumerate(matrixRep):
+        i = 0
+        while i < len(row):
+            # Initial Case: Not a word
+            if row[i] == '#':
+                i += 1
+                continue
+            
+            temp = row[i]
+            
+            j = i + 1
+            while j < len(row) and row[j] != '#':
+                temp += row[j]
+                j += 1
+            
+            #across.append((temp, (idx, i)))
+            across.append(temp)
+            i = j + 1
+
+    # Down
+    for idx, col in enumerate(np.transpose(matrixRep)):
+        i = 0
+        while i < len(col):
+            # Initial Case: Not a word
+            if col[i] == '#':
+                i += 1
+                continue
+            
+            temp = col[i]
+            
+            j = i + 1
+            while j < len(col) and col[j] != '#':
+                temp += col[j]
+                j += 1
+            
+            down.append((temp, (i, idx)))
+            i = j + 1
+    down.sort(key = lambda x: x[1][0]*100 + x[1][1])
+    down = [word for (word, _) in down]
+    return (across, down)
 
 def main():
     # scrapper = Scraper("../data/Crosserville Grid Search.html", 15)

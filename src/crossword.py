@@ -1,6 +1,7 @@
 from processing import GraphRepresentation
 import numpy as np 
 import regex as re
+import pandas as pd 
 from collections import Counter
 
 
@@ -14,7 +15,6 @@ class Crossword():
         self.answers = answers
         self.answer_to_id = answer_to_id 
         self.seed_words = np.random.choice(self.answers, self.n_seeds)
-        self.graph = GraphRepresentation()
 
 
     def get_rand_shared_character(self, word1: str, word2: str) -> tuple[int, int]:
@@ -28,6 +28,7 @@ class Crossword():
             word1 = first word
             word2 = second word
         '''
+        raise NotImplementedError("deprecated" )
         shared_characters = list(set(word1) & set(word2))
         if len(shared_characters) > 0:
             word1_char_counts = Counter(word1)
@@ -51,11 +52,12 @@ class Crossword():
             return None
 
 
-
     def generate_from_seeds(self) -> None:
         '''
         Function that will generate the graph from the words chosen via seeds
         '''
+        raise DeprecationWarning("Deprecated")
+        raise NotImplementedError("Deprecated")
         for i in range(len(self.seed_words)):
             for j in range(len(self.seed_words)):
                 if i != j:
@@ -74,6 +76,24 @@ class Crossword():
                         # print(shared_character, type(shared_character))
                         self.graph.addEdge(word1_id, word2_id, word1_pos, word2_pos, shared_character)
 
+
+def gen_seed_words(topic,n=4,lenrange=(10,14),load_from_file='../data/clues.pd',file_type = "pickle"): 
+    """
+    Generates seed category words from 
+    
+    """
+    df = pd.read_pickle(load_from_file)
+
+    df = df[df["answer"].apply(lambda x: len(x)).isin(range(lenrange[0],lenrange[1]))]
+
+    choices = df.sample(n=n)
+    return choices
+
+if __name__ == "__main__": 
+    gen_seed_words("my dog mitsy")
+
+    
+    
 
 
                 
